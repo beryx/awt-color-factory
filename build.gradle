@@ -1,0 +1,178 @@
+import org.gradle.plugins.signing.Sign
+import javax.swing.*
+
+plugins {
+    id 'idea'
+    id 'maven-publish'
+    id "com.github.ethankhall.semantic-versioning" version "1.1.0"
+    id "com.github.hierynomus.license" version "0.12.1"
+    id "com.jfrog.bintray" version "1.8.1"
+    id "net.saliman.properties" version "1.4.6"
+}
+
+project.version.with {
+    major = awtColorFactoryVersionMajor as int
+    minor= awtColorFactoryVersionMinor as int
+    patch = awtColorFactoryVersionPatch as int
+    if (project.hasProperty('awtColorFactoryVersionLabel')) {
+        preRelease = awtColorFactoryVersionLabel
+    }
+    releaseBuild = Boolean.valueOf(awtColorFactoryReleaseBuild)
+}
+ext.awtColorFactoryVersion = project.version as String
+ext.awtColorFactoryTag = Boolean.valueOf(awtColorFactoryReleaseBuild) ? "v$ext.awtColorFactoryVersion" : 'master'
+
+def pomConfig = {
+    url "https://github.com/beryx/awt-color-factory"
+    developers {
+        developer {
+            id "siordache"
+            name "Serban Iordache"
+        }
+    }
+    scm {
+        connection "https://github.com/beryx/awt-color-factory.git"
+        developerConnection "https://github.com/beryx/awt-color-factory.git"
+        url "https://github.com/beryx/awt-color-factory"
+    }
+}
+
+apply plugin: 'signing'
+repositories {
+    jcenter()
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+}
+
+apply plugin: 'application'
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'com.github.hierynomus.license'
+
+sourceCompatibility = 1.8
+group = 'org.beryx'
+version = awtColorFactoryVersion
+
+def defaultEncoding = 'UTF-8'
+[compileJava, compileTestJava]*.options*.encoding = defaultEncoding
+
+license {
+    header rootProject.file("license-header.txt")
+    skipExistingHeaders true
+    ignoreFailures false
+}
+
+signing {
+    sign configurations.archives
+}
+
+signArchives {
+    onlyIf { gradle.taskGraph.allTasks.findAll {task -> isPublishTask(task)} }
+}
+
+dependencies {
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.21'
+    runtime ('ch.qos.logback:logback-classic:1.1.7')
+    testCompile 'junit:junit:4.12'
+    testCompile('ch.qos.logback:logback-classic:1.1.7')
+}
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': "awt-color-factory",
+                'Main-Class': 'org.beryx.awt.color.ColorFactory',
+                'Implementation-Version': awtColorFactoryVersion
+    }
+}
+mainClassName = 'org.beryx.awt.color.ColorFactory'
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: classes) {
+    classifier "javadoc"
+    from javadoc
+}
+
+artifacts {
+    archives(sourcesJar, javadocJar)
+}
+
+publishing {
+    publications {
+        "awt-color-factory"(MavenPublication) {
+            from components.java
+            artifact sourcesJar { classifier "sources" }
+            artifact javadocJar { classifier "javadoc" }
+            groupId 'org.beryx'
+            artifactId project.name
+            version awtColorFactoryVersion
+            pom.withXml {
+                def root = asNode()
+                root.appendNode('name', "Module $project.name")
+                root.appendNode('description', "The $project.name artifact")
+                root.children().last() + pomConfig
+
+                // We cannot configure the licenses in pomConfig due to a name conflict with the 'license' extension defined by the com.github.hierynomus.license plugin
+                def licenseNode = root.appendNode('licenses').appendNode('license')
+                licenseNode.appendNode('name', 'The GNU General Public License Version 2')
+                licenseNode.appendNode('url', 'https://www.gnu.org/licenses/gpl-2.0.en.html')
+                licenseNode.appendNode('distribution', 'repo')
+            }
+        }
+    }
+}
+
+def readPasswordFromConsole(title, prompt) {
+    JPanel panel = new JPanel()
+    JLabel label = new JLabel(prompt)
+    JPasswordField pass = new JPasswordField(24)
+    panel.add(label)
+    panel.add(pass)
+    def options = ["OK", "Cancel"] as Object[]
+    int option = JOptionPane.showOptionDialog(null, panel, title,
+            JOptionPane.NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, null)
+    if(option != 0) throw new InvalidUserDataException("Operation cancelled by the user.")
+    new String(pass.password)
+}
+
+def isPublishTask(task) {
+    task.name.startsWith('publish')
+}
+
+gradle.taskGraph.whenReady { taskGraph ->
+    if (gradle.taskGraph.allTasks.findAll {task -> isPublishTask(task)}) {
+        if(!project.hasProperty('signingKeyId') || !project.hasProperty('signingSecretKeyRingFile'))
+            throw new InvalidUserDataException("Please configure your signing credentials in gradle-local.properties.")
+        def password = readPasswordFromConsole('Please enter your PGP credentials:', 'PGP Private Key Password')
+        allprojects { ext."signing.keyId" = signingKeyId }
+        allprojects { ext."signing.secretKeyRingFile" = signingSecretKeyRingFile }
+        allprojects { ext."signing.password" = password }
+    }
+}
+
+bintray {
+    user = project.hasProperty('bintrayUser') ? project.getProperty('bintrayUser') : "unknownUser"
+    key =  project.hasProperty('bintrayKey') ? project.getProperty('bintrayKey') : "unknownKey"
+    publications = ['awt-color-factory']
+    pkg {
+        repo = 'maven'
+        name = 'awt-color-factory'
+        userOrg = 'beryx'
+        licenses = ['GPLv2']
+        vcsUrl = 'https://github.com/beryx/awt-color-factory.git'
+
+        version {
+                name = awtColorFactoryVersion
+                desc = "AWT Color Factory $awtColorFactoryVersion"
+                released  = new Date().format("yyyy-MM-dd'T'HH:mm:ss.SSSZZ")
+                vcsTag = awtColorFactoryVersion
+                gpg {
+                    sign = true
+                }
+        }
+    }
+}
