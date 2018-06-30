@@ -18,15 +18,14 @@
  */
 package org.beryx.awt.color;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.awt.*;
-
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ColorFactoryTest {
     @Test
-    public void valueOfTesz() {
+    public void valueOfTest() {
         assertEquals(Color.red, ColorFactory.valueOf("red"));
         assertEquals(ColorFactory.FIREBRICK, ColorFactory.valueOf("firebrick"));
         assertEquals(new Color(170, 56, 224), ColorFactory.valueOf("#aa38e0"));
