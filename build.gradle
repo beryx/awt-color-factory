@@ -343,7 +343,7 @@ bintray {
         repo = 'maven'
         name = 'awt-color-factory'
         userOrg = 'beryx'
-        licenses = ['GPLv2']
+        licenses = ['GPL-2.0+CE']
         vcsUrl = 'https://github.com/beryx/awt-color-factory.git'
 
         version {
