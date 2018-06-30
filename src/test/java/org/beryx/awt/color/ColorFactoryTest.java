@@ -24,7 +24,7 @@ import java.awt.*;
 
 import static org.junit.Assert.assertEquals;
 
-public class AwtColorFactoryTest {
+public class ColorFactoryTest {
     @Test
     public void valueOfTesz() {
         assertEquals(Color.red, ColorFactory.valueOf("red"));
@@ -39,5 +39,7 @@ public class AwtColorFactoryTest {
     public void webTest() {
         assertEquals(new Color(170, 56, 224, (int)(0.3 * 255 + 0.5)), ColorFactory.web("#aa38e0", 0.3));
         assertEquals(new Color(64, 168, 204, (int)(0.7 * 255 + 0.5)), ColorFactory.web("0x40A8CC", 0.7));
+        assertEquals(new Color(34, 139, 34, (int)(0.6 * 255 + 0.5)), ColorFactory.web("forestgreen", 0.6));
+        assertEquals(new Color(98, 18, 179, (int)(0.8 * 255 + 0.5)), ColorFactory.web("hsl(270,90%,70%)", 0.8));
     }
 }

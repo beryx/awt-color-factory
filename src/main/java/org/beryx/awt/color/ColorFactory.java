@@ -240,7 +240,7 @@ public final class ColorFactory {
 				if (opacity == 1.0) {
 					return col;
 				} else {
-					return new Color(col.getRed(), col.getGreen(), col.getBlue(), (float)opacity);
+					return new Color(col.getRed(), col.getGreen(), col.getBlue(), (int)(255 * opacity + 0.5));
 				}
 			}
 		}
