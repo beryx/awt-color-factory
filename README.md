@@ -4,5 +4,18 @@
 
 # AWT Color Factory
 
-A utility class that offers methods for creating java.awt.Color instances from string representations.
+A utility class that offers static methods for creating java.awt.Color instances from string representations.
+These methods are the counterpart of methods available in javafx.scene.paint.Color, such as
+- valueOf(String value)
+- web(String colorString)
+- web(String colorString, double opacity)
 
+### Example usage
+
+    Color c1 = ColorFactory.valueOf("firebrick");
+    Color c2 = ColorFactory.valueOf("#aa38e0");
+    Color c3 = ColorFactory.valueOf("0x40A8CC");
+    Color c4 = ColorFactory.valueOf("rgba(112,36,228,0.9)");
+    Color c5 = ColorFactory.web("forestgreen", 0.7);
+    Color c6 = ColorFactory.web("hsl(270,90%,70%)", 0.8);
+    
