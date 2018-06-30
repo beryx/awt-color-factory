@@ -12,5 +12,5 @@ cache:
   directories:
     - $HOME/.gradle
 
-script: ./gradlew --info --stacktrace build
+script: ./gradlew --info --stacktrace modularBuild
 
