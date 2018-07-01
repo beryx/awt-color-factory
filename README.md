@@ -1,6 +1,7 @@
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 [![License](https://img.shields.io/badge/License-GPL%202%20with%20Classpath%20exception-blue.svg)](https://github.com/beryx/awt-color-factory/blob/master/LICENSE)
 [![Build Status](https://img.shields.io/travis/beryx/awt-color-factory/master.svg?label=Build)](https://travis-ci.org/beryx/awt-color-factory)
+[![Javadocs](http://www.javadoc.io/badge/org.beryx/awt-color-factory.png?color=red)](http://www.javadoc.io/doc/org.beryx/awt-color-factory)
 
 # AWT Color Factory
 
@@ -39,3 +40,6 @@ _AWT Color Factory_ contains code that is almost identical to that found in java
 therefore the library is distributed under the same license as OpenJFX: the [GPL 2 with Classpath exception](http://openjdk.java.net/legal/gplv2+ce.html).
 The _Classpath exception_ clause gives you permission to include this library in your executable code, 
 regardless of the license under which your software is distributed.
+
+This library requires Java 7 or newer.
+The jar artifact is modularized under the name [org.beryx.awt.color](https://github.com/beryx/awt-color-factory/raw/master/src/main/java/module-info.java).
