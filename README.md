@@ -5,11 +5,12 @@
 
 # AWT Color Factory
 
-A utility class that offers static methods for creating java.awt.Color instances from string representations.
-These methods are the counterpart of static methods available in javafx.scene.paint.Color, such as
-- valueOf(String value)
-- web(String colorString)
-- web(String colorString, double opacity)
+In JavaFX you can easily create a javafx.scene.paint.Color object from a string representation such as
+"lightblue", "#aa38e0", or "0x40A8CC" by using
+[Color.web()](https://docs.oracle.com/javase/10/docs/api/javafx/scene/paint/Color.html#web(java.lang.String))
+or [Color.valueOf()](https://docs.oracle.com/javase/10/docs/api/javafx/scene/paint/Color.html#valueOf(java.lang.String)).
+
+This one-class project provides equivalent methods for creating java.awt.Color objects.
 
 ### Example usage
 
@@ -19,6 +20,14 @@ These methods are the counterpart of static methods available in javafx.scene.pa
     Color c4 = ColorFactory.valueOf("rgba(112,36,228,0.9)");
     Color c5 = ColorFactory.web("forestgreen", 0.7);
     Color c6 = ColorFactory.web("hsl(270,90%,70%)", 0.8);
+
+See the [javadoc](https://static.javadoc.io/org.beryx/awt-color-factory/1.0.0/org/beryx/awt/color/ColorFactory.html)
+for more details.
+
+Why should you use this library? Can't you just call the JavaFX methods and convert the returned javafx.scene.paint.Color into a java.awt.Color?
+Of course you can. But you may find this little library useful if you don't want your code to depend on JavaFX.
+And remember, starting with JDK 11, JavaFX will be no longer part of the JDK.
+
 
 
 _AWT Color Factory_ is available in JCenter and Maven Central.
