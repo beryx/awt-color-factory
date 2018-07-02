@@ -7,8 +7,9 @@
 
 In JavaFX you can easily create a javafx.scene.paint.Color object from a string representation such as
 "lightblue", "#aa38e0", or "0x40A8CC" by using
-[Color.web()](https://docs.oracle.com/javase/10/docs/api/javafx/scene/paint/Color.html#web(java.lang.String))
-or [Color.valueOf()](https://docs.oracle.com/javase/10/docs/api/javafx/scene/paint/Color.html#valueOf(java.lang.String)).
+[Color.web(String colorString)](https://docs.oracle.com/javase/10/docs/api/javafx/scene/paint/Color.html#web(java.lang.String)),
+[Color.web(String colorString, double opacity)](https://docs.oracle.com/javase/10/docs/api/javafx/scene/paint/Color.html#web(java.lang.String,double)),
+or [Color.valueOf(String value)](https://docs.oracle.com/javase/10/docs/api/javafx/scene/paint/Color.html#valueOf(java.lang.String)).
 
 This one-class project provides equivalent methods for creating java.awt.Color objects.
 
@@ -26,7 +27,7 @@ for more details.
 
 Why should you use this library? Can't you just call the JavaFX methods and convert the returned javafx.scene.paint.Color into a java.awt.Color?
 Of course you can. But you may find this little library useful if you don't want your code to depend on JavaFX.
-And remember, starting with JDK 11, JavaFX will be no longer part of the JDK.
+And remember, starting with JDK 11, JavaFX is no longer part of the JDK.
 
 
 
