@@ -299,8 +299,8 @@ publishing {
 
                 // We cannot configure the licenses in pomConfig due to a name conflict with the 'license' extension defined by the com.github.hierynomus.license plugin
                 def licenseNode = root.appendNode('licenses').appendNode('license')
-                licenseNode.appendNode('name', 'The GNU General Public License Version 2')
-                licenseNode.appendNode('url', 'https://www.gnu.org/licenses/gpl-2.0.en.html')
+                licenseNode.appendNode('name', 'GNU General Public License, version 2, with the Classpath Exception')
+                licenseNode.appendNode('url', 'https://openjdk.java.net/legal/gplv2+ce.html')
                 licenseNode.appendNode('distribution', 'repo')
             }
         }
