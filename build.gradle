@@ -4,11 +4,13 @@ import javax.swing.*
 plugins {
     id 'idea'
     id 'maven-publish'
+    id "org.javamodularity.moduleplugin" version "1.5.0"
     id "com.github.ethankhall.semantic-versioning" version "1.1.0"
     id "com.github.hierynomus.license" version "0.14.0"
     id "com.jfrog.bintray" version "1.8.3"
     id "net.saliman.properties" version "1.4.6"
 }
+modularity.mixedJavaRelease 7
 
 project.version.with {
     major = awtColorFactoryVersionMajor as int
@@ -20,26 +22,11 @@ project.version.with {
     releaseBuild = Boolean.valueOf(awtColorFactoryReleaseBuild)
 }
 
-if(hasProperty('javaCompatibility')) {
-    ext.javaCompatibility = ext.javaCompatibility as int
-} else {
-    ext.javaCompatibility = 7
-}
 ext {
     awtColorFactoryVersion = project.version as String
     awtColorFactoryTag = Boolean.valueOf(awtColorFactoryReleaseBuild) ? "v$ext.awtColorFactoryVersion" : 'master'
 
     moduleName = 'org.beryx.awt.color'
-
-    javaVersion = (System.properties['java.specification.version'] ?: 1.0) as double
-    if (1.2 <= javaVersion && javaVersion < 2) {
-        javaVersion = ((int) (10 * javaVersion)) % 10
-    } else {
-        javaVersion = (int) javaVersion
-    }
-    if (javaVersion < (javaCompatibility as int)) {
-        throw new GradleException("Cannot generate java-$javaCompatibility compatible code using a java-$javaVersion compiler")
-    }
 }
 
 def pomConfig = {
@@ -70,7 +57,6 @@ apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'com.github.hierynomus.license'
 
-sourceCompatibility = 1.8
 group = 'org.beryx'
 version = awtColorFactoryVersion
 
@@ -115,172 +101,6 @@ task javadocJar(type: Jar, dependsOn: classes) {
 artifacts {
     archives(sourcesJar, javadocJar)
 }
-
-afterEvaluate {
-    javadoc {
-        inputs.property("moduleName", moduleName)
-        options.addBooleanOption('html5', true)
-        doFirst {
-            if(javaCompatibility >= 9) {
-                options.addStringOption('-module-path', classpath.asPath)
-            }
-        }
-    }
-
-    compileJava {
-        inputs.property("moduleName", moduleName)
-        doFirst {
-            sourceCompatibility = javaCompatibility
-            targetCompatibility = javaCompatibility
-            if(javaCompatibility <= 8) {
-                sourceSets.main.java.exclude '**/module-info.java'
-            } else {
-                options.compilerArgs = [
-                        '--module-path', classpath.asPath,
-                ]
-                classpath = files()
-            }
-        }
-    }
-
-    compileTestJava {
-        inputs.property("moduleName", moduleName)
-        doFirst {
-            sourceCompatibility = javaCompatibility
-            targetCompatibility = javaCompatibility
-            if(javaCompatibility >= 9) {
-                options.compilerArgs = [
-                        '--module-path', classpath.asPath,
-                        '--add-modules', 'org.junit.jupiter.api',
-                        '--add-reads', "$moduleName=org.junit.jupiter.api",
-                        '--patch-module', "$moduleName=" + files(sourceSets.test.java.srcDirs).asPath,
-                ]
-                classpath = files()
-            }
-        }
-    }
-
-    test {
-        inputs.property("moduleName", moduleName)
-        doFirst {
-            if(javaCompatibility >= 9) {
-                jvmArgs = [
-                        '--module-path', classpath.asPath,
-                        '--add-modules', 'ALL-MODULE-PATH',
-                        '--add-reads', "$moduleName=org.junit.jupiter.api",
-                        '--patch-module', "$moduleName=" + files(sourceSets.test.java.outputDir).asPath,
-                ]
-                classpath = files()
-            }
-        }
-
-        ignoreFailures = false
-
-        useJUnitPlatform()
-
-        testLogging {
-            exceptionFormat = 'full'
-            showStandardStreams = true
-        }
-
-        beforeTest { descriptor ->
-            logger.lifecycle("Starting: $descriptor")
-        }
-        afterTest { descriptor ->
-            logger.lifecycle("Finished: $descriptor")
-        }
-        outputs.upToDateWhen {false}
-    }
-}
-
-task extractModuleInfoClass {
-    doLast {
-        copy {
-            from zipTree(jar.archivePath)
-            include "module-info.class"
-            into "${buildDir}/mod-info-tmp"
-        }
-    }
-}
-task cleanClassesAndLibs {
-    doLast {
-        delete sourceSets.main.java.outputDir
-        delete jar.archivePath
-    }
-}
-
-task insertInfoClass() {
-    doLast {
-        jar {
-            from file("$buildDir/mod-info-tmp/module-info.class")
-        }.execute()
-    }
-}
-
-task copyInfoClass() {
-    doLast {
-        copy {
-            from "$buildDir/mod-info-tmp/module-info.class"
-            into "$buildDir/classes/java/main"
-        }
-    }
-}
-
-afterEvaluate {
-    task jarWithJava9(type: GradleBuild) {
-        startParameter = gradle.startParameter.newBuild()
-        startParameter.projectProperties.javaCompatibility = 9
-        buildFile = './build.gradle'
-        tasks = ['clean', 'jar']
-    }
-    task jarWithCompatibility(type: GradleBuild) {
-        startParameter = gradle.startParameter.newBuild()
-        startParameter.projectProperties.javaCompatibility = javaCompatibility
-        buildFile = './build.gradle'
-        tasks = ['cleanClassesAndLibs', 'jar']
-    }
-    task modularJar(dependsOn: [jarWithJava9, extractModuleInfoClass, jarWithCompatibility, insertInfoClass]) {
-        group = 'build'
-        description = "Assembles a java-8 compatible archive containing the main classes and a java-9 module-info.class"
-        extractModuleInfoClass.mustRunAfter jarWithJava9
-        jarWithCompatibility.mustRunAfter extractModuleInfoClass
-        insertInfoClass.mustRunAfter jarWithCompatibility
-    }
-
-    task buildWithJava9(type: GradleBuild) {
-        startParameter = gradle.startParameter.newBuild()
-        startParameter.projectProperties.javaCompatibility = 9
-        buildFile = './build.gradle'
-        tasks = ['clean', 'build']
-    }
-    task buildWithCompatibility(type: GradleBuild) {
-        startParameter = gradle.startParameter.newBuild()
-        startParameter.projectProperties.javaCompatibility = javaCompatibility
-        buildFile = './build.gradle'
-        tasks = ['cleanClassesAndLibs', 'build']
-    }
-    task modularBuild(dependsOn: [buildWithJava9, extractModuleInfoClass, buildWithCompatibility, insertInfoClass]) {
-        group = 'build'
-        description = "Assembles and tests this project, creating a java-8 compatible jar that contains a java-9 module-info.class"
-        extractModuleInfoClass.mustRunAfter buildWithJava9
-        buildWithCompatibility.mustRunAfter extractModuleInfoClass
-        insertInfoClass.mustRunAfter buildWithCompatibility
-    }
-
-    // Create and save the module-info.class files before running uploadArchives
-    uploadArchives {
-        dependsOn jarWithJava9, extractModuleInfoClass, cleanClassesAndLibs
-        extractModuleInfoClass.mustRunAfter jarWithJava9
-        cleanClassesAndLibs.mustRunAfter extractModuleInfoClass
-    }
-}
-
-gradle.taskGraph.whenReady {taskGraph ->
-    if (javaVersion < 9 && (taskGraph.hasTask(jarWithJava9) || taskGraph.hasTask(buildWithJava9))) {
-        throw new GradleException("You need a java-9 or newer compiler to execute this task.")
-    }
-}
-
 
 publishing {
     publications {
