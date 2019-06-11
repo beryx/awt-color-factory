@@ -5,6 +5,9 @@
 
 # AWT Color Factory
 
+
+### :bulb: _You can use this library regardless of the license under which your software is distributed._
+
 In JavaFX you can easily create a javafx.scene.paint.Color object from a string representation such as
 "lightblue", "#aa38e0", or "0x40A8CC" by using
 [Color.web(String colorString)](https://docs.oracle.com/javase/10/docs/api/javafx/scene/paint/Color.html#web(java.lang.String)),
@@ -22,7 +25,7 @@ This one-class project provides equivalent methods for creating java.awt.Color o
     Color c5 = ColorFactory.web("forestgreen", 0.7);
     Color c6 = ColorFactory.web("hsl(270,90%,70%)", 0.8);
 
-See the [javadoc](https://static.javadoc.io/org.beryx/awt-color-factory/1.0.0/org/beryx/awt/color/ColorFactory.html)
+See the [javadoc](https://static.javadoc.io/org.beryx/awt-color-factory/1.0.1/org/beryx/awt/color/ColorFactory.html)
 for more details.
 
 Why should you use this library? Can't you just call the JavaFX methods and convert the returned javafx.scene.paint.Color into a java.awt.Color?
@@ -38,17 +41,17 @@ _AWT Color Factory_ is available in JCenter and Maven Central.
     <dependency>
         <groupId>org.beryx</groupId>
         <artifactId>awt-color-factory</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.1</version>
     </dependency>
 
 **Gradle**
 
-    compile 'org.beryx:awt-color-factory:1.0.0'
+    compile 'org.beryx:awt-color-factory:1.0.1'
 
 
 _AWT Color Factory_ contains code that is almost identical to that found in javafx.scene.paint.Color,
 therefore the library is distributed under the same license as OpenJFX: the [GPL 2 with Classpath exception](http://openjdk.java.net/legal/gplv2+ce.html).
-**The _Classpath exception_ clause gives you permission to include this library in your executable code, 
+**The _Classpath exception_ clause gives you permission to include this library in your executable code,
 regardless of the license under which your software is distributed.**
 
 This library requires Java 7 or newer.
