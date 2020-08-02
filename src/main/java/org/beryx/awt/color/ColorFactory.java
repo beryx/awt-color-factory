@@ -274,7 +274,7 @@ public final class ColorFactory {
 				g = Integer.parseInt(color.substring(2, 4), 16);
 				b = Integer.parseInt(color.substring(4, 6), 16);
 				a = Integer.parseInt(color.substring(6, 8), 16);
-				return new Color(r, g, b, (float)(opacity * a / 255.0));
+				return new Color(r, g, b, (int)(opacity * a + 0.5));
 			}
 		} catch (NumberFormatException nfe) {}
 
